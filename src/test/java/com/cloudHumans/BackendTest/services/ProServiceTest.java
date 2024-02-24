@@ -79,7 +79,25 @@ class ProServiceTest {
         ProService proService = new ProService();
         EligibleProject result = proService.proEligibleProjects(pro);
 
-        assertEquals(1, result.getScore());
+        assertEquals(2, result.getScore());
+        assertEquals(0, result.getEligibleProjects().size());
+        assertEquals(4, result.getIneligibleProjects().size());
+    }
+
+    @Test
+    void testProEligibleProjectsSixthScenario() {
+        Pro pro = new Pro();
+        pro.setAge(20);
+        pro.setEducationLevel("no_education"); //0
+        pro.setPastExperiences(new PastExperience(true, false)); //5
+        pro.setInternetTest(new InternetTest(4.0f, 4.0f)); //-1 -1 = -2
+        pro.setWritingScore(-0.1); //-1
+        pro.setReferralCode("errado"); //0
+
+        ProService proService = new ProService();
+        EligibleProject result = proService.proEligibleProjects(pro);
+
+        assertEquals(2, result.getScore());
         assertEquals(0, result.getEligibleProjects().size());
         assertEquals(4, result.getIneligibleProjects().size());
     }

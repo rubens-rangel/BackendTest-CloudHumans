@@ -1,7 +1,7 @@
 package com.cloudHumans.BackendTest.services;
 
-import com.cloudHumans.BackendTest.entities.InternetTest;
 import com.cloudHumans.BackendTest.entities.EligibleProject;
+import com.cloudHumans.BackendTest.entities.InternetTest;
 import com.cloudHumans.BackendTest.entities.Pro;
 import com.cloudHumans.BackendTest.exceptions.UnderAgeException;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class ProService {
     private static final double SCORE_HIGHER = 0.7;
     private static final String VALID_TOKEN = "token1234";
 
-    public EligibleProject proEligibleProjects(Pro pro){
+    public EligibleProject proEligibleProjects(Pro pro) {
         ageValidate(pro);
         Integer calculated_score = score(pro);
 
@@ -65,20 +65,40 @@ public class ProService {
     protected Integer score(Pro pro) {
         Integer score = 0;
 
+        score = calculateEducationLevel(pro, score);
+        score = calculatePastExperiences(pro, score);
+        score = CalculateInternetSpeed(pro, score);
+        score = calculateWritingScore(pro, score);
+        score = calculateValidToken(pro, score);
+
+        return score;
+    }
+
+    private static Integer calculateEducationLevel(Pro pro, Integer score) {
         // Education
         if (pro.getEducationLevel() != null) {
             if (pro.getEducationLevel().equals("high_school")) {
                 score++;
 
-
             } else if ((pro.getEducationLevel().equals("bachelors_degree_or_high"))) {
                 score += 2;
             }
         }
+        return score;
+    }
 
-        score = calculatePastExperiences(pro, score);
+    private static Integer calculatePastExperiences(Pro pro, Integer score) {
 
-        // Internet Speed
+        if (pro.getPastExperiences() != null && Boolean.TRUE.equals(pro.getPastExperiences().getSales())) {
+            score += 5;
+        }
+        if (pro.getPastExperiences() != null && Boolean.TRUE.equals(pro.getPastExperiences().getSupport())) {
+            score += 3;
+        }
+        return score;
+    }
+
+    private static Integer CalculateInternetSpeed(Pro pro, Integer score) {
         InternetTest internetTest = pro.getInternetTest();
         if (internetTest != null) {
             Float downloadSpeed = internetTest.getDownloadSpeed();
@@ -102,8 +122,10 @@ public class ProService {
                 }
             }
         }
+        return score;
+    }
 
-        // Writhing Score
+    private static Integer calculateWritingScore(Pro pro, Integer score) {
         Double writingScore = pro.getWritingScore();
         if (writingScore != null) {
             if (writingScore < SCORE_LOWER) {
@@ -114,22 +136,13 @@ public class ProService {
                 score++;
             }
         }
-
-        // Valid Token
-        if (VALID_TOKEN.equals(pro.getReferralCode())) {
-            score++;
-        }
-
         return score;
     }
 
-    private static Integer calculatePastExperiences(Pro pro, Integer score) {
-        // Experience
-        if (pro.getPastExperiences() != null && Boolean.TRUE.equals(pro.getPastExperiences().getSales())) {
-            score += 5;
-        }
-        if (pro.getPastExperiences()!= null && Boolean.TRUE.equals(pro.getPastExperiences().getSupport())) {
-            score += 3;
+
+    private static Integer calculateValidToken(Pro pro, Integer score) {
+        if (VALID_TOKEN.equals(pro.getReferralCode())) {
+            score++;
         }
         return score;
     }
