@@ -3,7 +3,8 @@ package com.cloudHumans.BackendTest.controllers;
 import com.cloudHumans.BackendTest.entities.EligibleProject;
 import com.cloudHumans.BackendTest.entities.Pro;
 import com.cloudHumans.BackendTest.exceptions.UnderAgeException;
-import com.cloudHumans.BackendTest.services.ProService;
+import com.cloudHumans.BackendTest.services.ProEligibleProjects;
+import com.cloudHumans.BackendTest.services.ProScore;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -15,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 class ProsControllerTest {
@@ -24,7 +24,10 @@ class ProsControllerTest {
     private ProsController prosController;
 
     @Mock
-    private ProService proService;
+    private ProScore proScore;
+
+    @Mock
+    private ProEligibleProjects proEligibleProjects;
 
     @BeforeEach
     void setUp() {
@@ -36,7 +39,7 @@ class ProsControllerTest {
         Pro validPro = new Pro();
         EligibleProject eligibleProject = new EligibleProject();
 
-        when(proService.proEligibleProjects(validPro)).thenReturn(eligibleProject);
+        when(proEligibleProjects.getEligibleProjects(validPro)).thenReturn(eligibleProject);
         ResponseEntity<Map<String, Object>> responseEntity = prosController.insert(validPro);
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
@@ -50,7 +53,7 @@ class ProsControllerTest {
         underAgePro.setAge(17);
 
         String errorMessage = "Pro is ineligible to be paired with any project due to age";
-        when(proService.proEligibleProjects(underAgePro)).thenThrow(new UnderAgeException(errorMessage));
+        when(proEligibleProjects.getEligibleProjects(underAgePro)).thenThrow(new UnderAgeException(errorMessage));
 
         ResponseEntity<Map<String, Object>> responseEntity = prosController.insert(underAgePro);
 
